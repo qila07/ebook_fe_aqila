@@ -20,15 +20,25 @@ export default function EditBook() {
     console.log(book, "ini book");
   }, [id]);
 
-  const updateBook = async (data) => {
-    await fetch(`/api/books/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
+const updateBook = async (data) => {
+  try {
+    const response = await fetch(`/api/books/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
     });
-    router.push('/books');
-  };
+
+    if (!response.ok) {
+      throw new Error("Gagal mengupdate buku");
+    }
+
+    router.push("/books");
+  } catch (error) {
+    console.error("Error:", error);
+    alert("Gagal mengupdate buku. Cek console untuk detail.");
+  }
+};
 
   if (!book) return <p>Loading...</p>;
-  return <BookForm initialData={book} onSubmit={updateBook} />;
+  return <BookForm initialData={book} onSubmit={updateBook} />; 
 }

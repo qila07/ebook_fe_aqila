@@ -1,9 +1,11 @@
+import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 
 export default function BookForm({ onSubmit, initialData }) {
+    const router = useRouter();
     const [title, setTitle] = useState(initialData?.title || '');
     const [author, setAuthor] = useState(initialData?.author || '');
-    const [coverFile, setCoverFile] = useState(null);
+    // const [coverFile, setCoverFile] = useState(null);
     const [category, setCategory] = useState(initialData?.category || '');
 
     const categories = [
@@ -18,18 +20,37 @@ export default function BookForm({ onSubmit, initialData }) {
         setCategory(initialData?.category || '');
     }, [initialData]);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+// Di komponen BookForm atau AddBook
+const handleSubmit = async (bookData) => {
+  try {
+    const response = await fetch('/api/books', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: bookData.title,
+        author: bookData.author,
+        category: bookData.category,
+        // Field tambahan jika ada
+        // year: bookData.year || null,
+        // description: bookData.description || null
+      })
+    });
 
-        let coverPath = "";
-        if (coverFile) {
-            coverPath = `/covers/${coverFile.name}`;
-            // ❗️Manual salin file ke /public/covers dibutuhkan
-        }
+    const result = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(result.message || 'Failed to add book');
+    }
 
-        onSubmit({ title, author, cover: coverPath, category });
-    };
+    // Redirect setelah sukses
+    router.push('/books');
+  } catch (error) {
+    console.error('Submission Error:', error);
+    alert(`Error: ${error.message}`);
+  }
+};
 
+    
     return (
     <div className="flex items-center justify-center min-h-screen px-5">
         <form
@@ -87,7 +108,7 @@ export default function BookForm({ onSubmit, initialData }) {
                 </select>
             </div>
 
-            <div>
+            {/* <div>
                 <label htmlFor="cover" className="block mb-1 font-bold text-blue-900">
                     Cover
                 </label>
@@ -99,7 +120,7 @@ export default function BookForm({ onSubmit, initialData }) {
                     className="w-full px-4 py-2 text-black rounded border border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required
                 />
-            </div>
+            </div> */}
 
             <button
                 type="submit"
